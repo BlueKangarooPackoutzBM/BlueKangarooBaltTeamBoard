@@ -216,13 +216,7 @@
         font-weight: 700; padding: .6rem 1rem;
       }
       .rdo-submit:disabled { opacity: .6; cursor: default; }
-      .rdo-success { text-align: center; padding: .5rem 0 .25rem; }
-      .rdo-success p { font-size: 1.15rem; font-weight: 700; margin: 0 0 1.1rem; }
-      .rdo-close {
-        background: var(--navy); color: #fff; border: 0; border-radius: 8px;
-        font-weight: 700; padding: .6rem 2rem;
-      }
-
+      .rdo-text { margin: 0 0 .5rem; font-size: 1.02rem; }
       @media (max-width: 380px) {
         h1 { font-size: 2rem; }
         .brand { font-size: .7rem; }
@@ -509,9 +503,26 @@
             <button type="submit" class="rdo-submit" id="rdo-submit">Send Request</button>
           </div>
         </form>
-        <div class="rdo-success" id="rdo-success" hidden>
-          <p id="rdo-success-msg">Request sent. Thank you!</p>
-          <button type="button" class="rdo-close" id="rdo-close">Close</button>
+      </div>
+    </div>
+
+    <div class="rdo-overlay" id="rdo-disclaimer" hidden>
+      <div class="rdo-panel" role="alertdialog" aria-modal="true" aria-labelledby="rdo-disclaimer-title" aria-describedby="rdo-disclaimer-text">
+        <h2 class="rdo-title" id="rdo-disclaimer-title" data-en="Disclaimer" data-es="Aviso">Disclaimer</h2>
+        <p class="rdo-text" id="rdo-disclaimer-text" data-en="Please note: submitting this request does not guarantee that the requested date will be approved. Management will review your request and will communicate with you directly to confirm whether approval is granted." data-es="Tenga en cuenta: el envío de esta solicitud no garantiza que la fecha solicitada sea aprobada. La gerencia revisará su solicitud y se comunicará con usted directamente para confirmar si se concede la aprobación.">Please note: submitting this request does not guarantee that the requested date will be approved. Management will review your request and will communicate with you directly to confirm whether approval is granted.</p>
+        <div class="rdo-actions">
+          <button type="button" class="rdo-cancel" id="rdo-disclaimer-cancel" data-en="Cancel" data-es="Cancelar">Cancel</button>
+          <button type="button" class="rdo-submit" id="rdo-disclaimer-agree">Agree</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rdo-overlay" id="rdo-thankyou" hidden>
+      <div class="rdo-panel" role="alertdialog" aria-modal="true" aria-labelledby="rdo-thankyou-title" aria-describedby="rdo-thankyou-text">
+        <h2 class="rdo-title" id="rdo-thankyou-title" data-en="Thank You" data-es="Gracias">Thank You</h2>
+        <p class="rdo-text" id="rdo-thankyou-text" data-en="We have received your request, and it is currently under review. We will communicate with you once a decision has been made." data-es="Hemos recibido su solicitud y actualmente se encuentra en revisión. Nos comunicaremos con usted una vez que se haya tomado una decisión.">We have received your request, and it is currently under review. We will communicate with you once a decision has been made.</p>
+        <div class="rdo-actions">
+          <button type="button" class="rdo-submit" id="rdo-thankyou-close" data-en="Close" data-es="Cerrar">Close</button>
         </div>
       </div>
     </div>
@@ -525,16 +536,18 @@
         /* ----- Request Day Off ----- */
         var BRIDGE_URL = 'https://script.google.com/macros/s/AKfycby-9XxjHAy-TXfurTN3Y_eQF6LSjYTrllH3qYz8q4QpSAw4Ks2Dzmz9vOj8oijI9zGw/exec';
         var RDO = {
-          en: { send: 'Send Request', sending: 'Sending…', success: 'Request sent. Thank you!', error: 'Something went wrong — please try again.', close: 'Close' },
-          es: { send: 'Enviar Solicitud', sending: 'Enviando…', success: 'Solicitud enviada. ¡Gracias!', error: 'Algo salió mal — inténtalo de nuevo.', close: 'Cerrar' }
+          en: { send: 'Send Request', sending: 'Sending…', agree: 'Agree', error: 'Something went wrong — please try again.' },
+          es: { send: 'Enviar Solicitud', sending: 'Enviando…', agree: 'Acepto', error: 'Algo salió mal — inténtalo de nuevo.' }
         };
         var overlay = document.getElementById('rdo-overlay');
         var form = document.getElementById('rdo-form');
-        var successBox = document.getElementById('rdo-success');
-        var successMsg = document.getElementById('rdo-success-msg');
+        var disclaimer = document.getElementById('rdo-disclaimer');
+        var thankyou = document.getElementById('rdo-thankyou');
         var errorEl = document.getElementById('rdo-error');
         var submitBtn = document.getElementById('rdo-submit');
-        var closeBtn = document.getElementById('rdo-close');
+        var agreeBtn = document.getElementById('rdo-disclaimer-agree');
+        var disclaimerCancelBtn = document.getElementById('rdo-disclaimer-cancel');
+        var thankyouCloseBtn = document.getElementById('rdo-thankyou-close');
         var nameInput = document.getElementById('rdo-name');
         var dateInput = document.getElementById('rdo-date');
         var noteInput = document.getElementById('rdo-note');
@@ -542,27 +555,30 @@
 
         function rdoStrings() {
           var s = RDO[currentLang];
-          if (!sending) submitBtn.textContent = s.send;
-          successMsg.textContent = s.success;
-          closeBtn.textContent = s.close;
+          if (!sending) {
+            submitBtn.textContent = s.send;
+            agreeBtn.textContent = s.agree;
+          }
           if (!errorEl.hidden) errorEl.textContent = s.error;
         }
         function openRdo() {
           form.hidden = false;
-          successBox.hidden = true;
           errorEl.hidden = true;
           overlay.hidden = false;
           nameInput.focus();
         }
         function closeRdo() {
           overlay.hidden = true;
-          if (!successBox.hidden) form.reset();
         }
         document.getElementById('rdo-open').addEventListener('click', openRdo);
         document.getElementById('rdo-cancel').addEventListener('click', closeRdo);
-        closeBtn.addEventListener('click', closeRdo);
         overlay.addEventListener('click', function (e) { if (e.target === overlay) closeRdo(); });
-        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !overlay.hidden) closeRdo(); });
+        document.addEventListener('keydown', function (e) {
+          if (e.key !== 'Escape') return;
+          if (!thankyou.hidden) { closeThankyou(); }
+          else if (!disclaimer.hidden) { if (!sending) disclaimer.hidden = true; }
+          else if (!overlay.hidden) { closeRdo(); }
+        });
         form.addEventListener('submit', function (e) {
           e.preventDefault();
           if (sending) return;
@@ -570,10 +586,22 @@
           var date = dateInput.value;
           var note = noteInput.value.trim();
           if (!name || !date || !note) { form.reportValidity(); return; }
-          sending = true;
-          submitBtn.disabled = true;
-          submitBtn.textContent = RDO[currentLang].sending;
           errorEl.hidden = true;
+          disclaimer.hidden = false;
+          agreeBtn.focus();
+        });
+        disclaimerCancelBtn.addEventListener('click', function () {
+          if (!sending) disclaimer.hidden = true;
+        });
+        agreeBtn.addEventListener('click', function () {
+          if (sending) return;
+          var name = nameInput.value.trim();
+          var date = dateInput.value;
+          var note = noteInput.value.trim();
+          sending = true;
+          agreeBtn.disabled = true;
+          disclaimerCancelBtn.disabled = true;
+          agreeBtn.textContent = RDO[currentLang].sending;
           fetch(BRIDGE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -581,19 +609,28 @@
           }).then(function (res) {
             if (!res.ok) throw new Error('Request failed');
             sending = false;
-            submitBtn.disabled = false;
-            submitBtn.textContent = RDO[currentLang].send;
-            form.hidden = true;
-            successBox.hidden = false;
-            closeBtn.focus();
+            agreeBtn.disabled = false;
+            disclaimerCancelBtn.disabled = false;
+            agreeBtn.textContent = RDO[currentLang].agree;
+            disclaimer.hidden = true;
+            thankyou.hidden = false;
+            thankyouCloseBtn.focus();
           }).catch(function () {
             sending = false;
-            submitBtn.disabled = false;
-            submitBtn.textContent = RDO[currentLang].send;
+            agreeBtn.disabled = false;
+            disclaimerCancelBtn.disabled = false;
+            agreeBtn.textContent = RDO[currentLang].agree;
+            disclaimer.hidden = true;
             errorEl.textContent = RDO[currentLang].error;
             errorEl.hidden = false;
           });
         });
+        function closeThankyou() {
+          thankyou.hidden = true;
+          overlay.hidden = true;
+          form.reset();
+        }
+        thankyouCloseBtn.addEventListener('click', closeThankyou);
 
         function setLang(lang) {
           currentLang = lang;
