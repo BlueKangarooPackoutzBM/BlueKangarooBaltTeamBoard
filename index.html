@@ -198,11 +198,11 @@
       .rdo-title { font-family: "Barlow Semi Condensed", "Barlow", sans-serif; font-size: 1.5rem; font-weight: 700; margin: 0 0 1rem; }
       .rdo-field { display: block; margin-bottom: .9rem; }
       .rdo-field > span { display: block; font-weight: 600; margin-bottom: .3rem; }
-      .rdo-field input, .rdo-field textarea {
+      .rdo-field input, .rdo-field textarea, .rdo-field select {
         width: 100%; font: inherit; color: var(--ink); background: var(--surface);
         border: 1px solid var(--line); border-radius: 8px; padding: .6rem .7rem;
       }
-      .rdo-field input:focus-visible, .rdo-field textarea:focus-visible { outline: 3px solid var(--bright); outline-offset: 0; border-color: var(--navy); }
+      .rdo-field input:focus-visible, .rdo-field textarea:focus-visible, .rdo-field select:focus-visible { outline: 3px solid var(--bright); outline-offset: 0; border-color: var(--navy); }
       .rdo-field textarea { resize: vertical; }
       .rdo-type-group { display: flex; flex-wrap: wrap; gap: .45rem; }
       .rdo-type {
@@ -239,6 +239,10 @@
       .rdo-cal-summary { margin: .6rem 0 0; font-weight: 600; min-height: 1.45em; }
       .rdo-error { color: #b3261e; font-weight: 600; margin: 0 0 .8rem; }
       @media (prefers-color-scheme: dark) { .rdo-error { color: #f2a49e; } }
+      .rdo-request-for {
+        margin: 0 0 .2rem; padding: .65rem .75rem; background: var(--surface-2);
+        border: 1px solid var(--line); border-radius: 8px; font-weight: 600;
+      }
       .rdo-actions { display: flex; gap: .6rem; margin-top: 1rem; }
       .rdo-cancel {
         flex: 1; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line);
@@ -520,7 +524,19 @@
         <form id="rdo-form">
           <label class="rdo-field">
             <span data-en="Your name" data-es="Tu nombre">Your name</span>
-            <input type="text" id="rdo-name" required autocomplete="name" />
+            <select id="rdo-name" required>
+              <option value="" selected data-en="Select your name" data-es="Selecciona tu nombre">Select your name</option>
+              <option value="Jennifer Perez">Jennifer Perez</option>
+              <option value="Yasmin Resendez">Yasmin Resendez</option>
+              <option value="Ben Williams">Ben Williams</option>
+              <option value="Carlos Levy">Carlos Levy</option>
+              <option value="Ever Romero">Ever Romero</option>
+              <option value="Cristian Garcia">Cristian Garcia</option>
+              <option value="Jhoana Guevara">Jhoana Guevara</option>
+              <option value="Jesica Garcia">Jesica Garcia</option>
+              <option value="Daniel Segura">Daniel Segura</option>
+              <option value="Ovidio A.">Ovidio A.</option>
+            </select>
           </label>
           <div class="rdo-field">
             <span id="rdo-cal-label" data-en="Date" data-es="Fecha">Date</span>
@@ -549,6 +565,7 @@
             <textarea id="rdo-note" rows="3" required></textarea>
           </label>
           <p class="rdo-error" id="rdo-error" hidden></p>
+          <p class="rdo-request-for" id="rdo-request-for" aria-live="polite">Request for: —</p>
           <div class="rdo-actions">
             <button type="button" class="rdo-cancel" id="rdo-cancel" data-en="Cancel" data-es="Cancelar">Cancel</button>
             <button type="submit" class="rdo-submit" id="rdo-submit">Send Request</button>
@@ -593,6 +610,8 @@
         var overlay = document.getElementById('rdo-overlay');
         var form = document.getElementById('rdo-form');
         var disclaimer = document.getElementById('rdo-disclaimer');
+        var disclaimerTitle = document.getElementById('rdo-disclaimer-title');
+        var disclaimerText = document.getElementById('rdo-disclaimer-text');
         var thankyou = document.getElementById('rdo-thankyou');
         var errorEl = document.getElementById('rdo-error');
         var submitBtn = document.getElementById('rdo-submit');
@@ -600,11 +619,20 @@
         var disclaimerCancelBtn = document.getElementById('rdo-disclaimer-cancel');
         var thankyouCloseBtn = document.getElementById('rdo-thankyou-close');
         var nameInput = document.getElementById('rdo-name');
+        var requestForEl = document.getElementById('rdo-request-for');
         var noteInput = document.getElementById('rdo-note');
         var typeGroup = document.getElementById('rdo-type-group');
         var typeBtns = typeGroup.querySelectorAll('.rdo-type');
         var selectedType = '';
         var sending = false;
+
+        function updateRequestFor() {
+          var name = nameInput.value ? nameInput.value.trim() : '';
+          var label = currentLang === 'es' ? 'Solicitud de: ' : 'Request for: ';
+          requestForEl.textContent = label + (name ? name : '—');
+        }
+        nameInput.addEventListener('change', updateRequestFor);
+        nameInput.addEventListener('input', updateRequestFor);
 
         /* ----- Request date calendar: single date, or a range for Vacation ----- */
         var calEl = document.getElementById('rdo-cal');
@@ -741,6 +769,27 @@
           updateCalMode();
         }
 
+        var DISCLAIMER_CONTENT = {
+          standard: {
+            enTitle: 'Disclaimer', esTitle: 'Aviso',
+            enText: 'Please note: submitting this request does not guarantee that the requested date will be approved. Management will review your request and will communicate with you directly to confirm whether approval is granted.',
+            esText: 'Tenga en cuenta: el envío de esta solicitud no garantiza que la fecha solicitada sea aprobada. La gerencia revisará su solicitud y se comunicará con usted directamente para confirmar si se concede la aprobación.'
+          },
+          medical: {
+            enTitle: 'Please Note', esTitle: 'Aviso',
+            enText: 'Please present a medical letter confirming your absence to management.',
+            esText: 'Por favor presente a la gerencia una carta médica que confirme su ausencia.'
+          }
+        };
+        function updateDisclaimerContent() {
+          var c = selectedType === 'Medical' ? DISCLAIMER_CONTENT.medical : DISCLAIMER_CONTENT.standard;
+          disclaimerTitle.setAttribute('data-en', c.enTitle);
+          disclaimerTitle.setAttribute('data-es', c.esTitle);
+          disclaimerTitle.textContent = currentLang === 'es' ? c.esTitle : c.enTitle;
+          disclaimerText.setAttribute('data-en', c.enText);
+          disclaimerText.setAttribute('data-es', c.esText);
+          disclaimerText.textContent = currentLang === 'es' ? c.esText : c.enText;
+        }
         function rdoStrings() {
           var s = RDO[currentLang];
           if (!sending) {
@@ -792,6 +841,7 @@
             sendRequest();
             return;
           }
+          updateDisclaimerContent();
           disclaimer.hidden = false;
           agreeBtn.focus();
         });
@@ -838,6 +888,7 @@
           thankyou.hidden = true;
           overlay.hidden = true;
           form.reset();
+          updateRequestFor();
           clearType();
           clearCalendar();
         }
@@ -854,11 +905,13 @@
           btnEs.setAttribute('aria-pressed', lang === 'es' ? 'true' : 'false');
           document.title = lang === 'es' ? 'Tablero del Equipo' : 'Team Board';
           rdoStrings();
+          updateRequestFor();
           renderCalendar();
         }
         btnEn.addEventListener('click', function () { setLang('en'); });
         btnEs.addEventListener('click', function () { setLang('es'); });
         rdoStrings();
+        updateRequestFor();
         renderCalendar();
       })();
     </script>
