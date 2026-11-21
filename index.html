@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Crew Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --navy: #0068b2;
+        --navy-deep: #004e86;
+        --bright: #00b6ee;
+        --gold: #e9a90c;
+        --gold-deep: #9a6d00;
+        --bg: #eef3f7;
+        --surface: #ffffff;
+        --surface-2: #f4f8fb;
+        --ink: #13222d;
+        --muted: #54687a;
+        --line: #d7e1e9;
+        --ok-bg: #e0f2e7;
+        --ok-ink: #0d6b3f;
+        --tent-bg: #fdf0cf;
+        --tent-ink: #7c5c00;
+        --tbc-bg: #e8edf1;
+        --tbc-ink: #4c5d6b;
+        --note-bg: #fdf6e0;
+        --note-ink: #6d5600;
+        --header-ink: #ffffff;
+        --shadow: 0 1px 3px rgba(10, 42, 66, .08), 0 6px 18px rgba(10, 42, 66, .05);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b1620;
+          --surface: #14242f;
+          --surface-2: #182b38;
+          --ink: #edf4f9;
+          --muted: #9db3c2;
+          --line: #2a3f4f;
+          --ok-bg: #12382a;
+          --ok-ink: #6fd598;
+          --tent-bg: #3d320e;
+          --tent-ink: #f2cd62;
+          --tbc-bg: #24333f;
+          --tbc-ink: #a9bccb;
+          --note-bg: #38300f;
+          --note-ink: #f0d078;
+          --shadow: 0 1px 3px rgba(0,0,0,.35), 0 6px 18px rgba(0,0,0,.25);
+        }
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-size: 16px;
+        line-height: 1.45;
+      }
+      button { min-height: 2.5rem; font: inherit; cursor: pointer; }
+
+      .wrap { max-width: 46rem; margin: 0 auto; padding: 0 1rem 2.5rem; }
+
+      /* ---------- Header ---------- */
+      header.hero {
+        background: linear-gradient(150deg, var(--navy-deep) 0%, var(--navy) 58%, #0a7fc4 100%);
+        color: var(--header-ink);
+        border-bottom: 4px solid var(--gold);
+      }
+      .hero-inner { max-width: 46rem; margin: 0 auto; padding: 1.1rem 1rem 1.25rem; }
+      .hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+      .brand {
+        font-size: .78rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+        color: #bfe6fb; margin: 0 0 .35rem; line-height: 1.35;
+      }
+      h1 {
+        font-family: "Barlow Semi Condensed", "Barlow", sans-serif;
+        font-size: 2.35rem; font-weight: 700; line-height: 1.02; margin: 0;
+        letter-spacing: .01em;
+      }
+      .subtitle { margin: .45rem 0 0; font-size: 1rem; color: #d9eefb; font-weight: 500; }
+      .lang-toggle {
+        display: flex; flex: none; border: 1.5px solid rgba(255,255,255,.65);
+        border-radius: 999px; overflow: hidden; margin-top: .15rem; background: rgba(0,0,0,.12);
+      }
+      .lang-toggle button {
+        border: 0; background: transparent; color: #fff; font-weight: 700; font-size: .92rem;
+        padding: .45rem .95rem; min-width: 3.1rem; line-height: 1;
+      }
+      .lang-toggle button[aria-pressed="true"] { background: #fff; color: var(--navy-deep); }
+      .lang-toggle button:focus-visible { outline: 3px solid var(--gold); outline-offset: -3px; }
+
+      /* ---------- Sections ---------- */
+      section { margin-top: 1.6rem; }
+      .section-head { display: flex; align-items: baseline; gap: .6rem; margin: 0 .1rem .7rem; }
+      h2 {
+        font-family: "Barlow Semi Condensed", "Barlow", sans-serif;
+        font-size: 1.45rem; font-weight: 700; margin: 0; letter-spacing: .015em;
+      }
+      .section-head::after { content: ""; flex: 1; border-top: 2px solid var(--line); transform: translateY(-4px); }
+
+      /* ---------- Day cards ---------- */
+      .day {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        box-shadow: var(--shadow); margin-bottom: .9rem; overflow: hidden;
+      }
+      .day-head {
+        display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+        padding: .65rem 1rem; background: var(--surface-2); border-bottom: 1px solid var(--line);
+      }
+      .day-name {
+        font-family: "Barlow Semi Condensed", "Barlow", sans-serif;
+        font-size: 1.22rem; font-weight: 700; line-height: 1.1;
+      }
+      .day-name .date { color: var(--muted); font-weight: 600; font-size: 1.02rem; margin-left: .35rem; }
+      .day-tag {
+        flex: none; font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: var(--navy); background: rgba(0,182,238,.14); border: 1px solid rgba(0,104,178,.35);
+        padding: .22rem .55rem; border-radius: 999px;
+      }
+      @media (prefers-color-scheme: dark) { .day-tag { color: var(--bright); } }
+
+      .job { padding: .85rem 1rem .9rem; }
+      .job + .job { border-top: 1px dashed var(--line); }
+      .job-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .6rem; }
+      .job-name { font-size: 1.13rem; font-weight: 700; line-height: 1.2; margin: 0; }
+      .job-work { margin: .15rem 0 0; font-size: 1rem; font-weight: 500; }
+      .job-meta { display: flex; flex-wrap: wrap; gap: .3rem 1.1rem; margin-top: .45rem; color: var(--muted); font-size: .95rem; font-weight: 500; }
+      .job-meta span { display: inline-flex; align-items: center; gap: .35rem; }
+      .job-meta svg { flex: none; }
+      .crew-line { margin-top: .5rem; font-size: .95rem; color: var(--muted); display: flex; align-items: center; gap: .35rem; }
+      .crew-line strong { color: var(--ink); font-weight: 600; }
+
+      .chip {
+        flex: none; font-size: .8rem; font-weight: 700; letter-spacing: .02em;
+        padding: .28rem .6rem; border-radius: 999px; line-height: 1; white-space: nowrap; margin-top: .1rem;
+      }
+      .chip-confirmed { background: var(--ok-bg); color: var(--ok-ink); }
+      .chip-tentative { background: var(--tent-bg); color: var(--tent-ink); }
+      .chip-tbc { background: var(--tbc-bg); color: var(--tbc-ink); }
+
+      .day-note {
+        display: flex; gap: .5rem; align-items: flex-start;
+        margin: 0 1rem 1rem; padding: .6rem .75rem; border-radius: 8px;
+        background: var(--note-bg); color: var(--note-ink); font-weight: 600; font-size: .97rem;
+      }
+      .day-note svg { flex: none; margin-top: .15rem; }
+
+      .day-empty { padding: 1.05rem 1rem; display: flex; align-items: center; gap: .6rem; font-size: 1.02rem; }
+      .day-empty .big { font-weight: 700; }
+      .day-empty svg { flex: none; color: var(--muted); }
+
+      /* ---------- Pipeline ---------- */
+      .pipe-list { list-style: none; margin: 0; padding: 0; }
+      .pipe-item {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        box-shadow: var(--shadow); padding: .85rem 1rem; margin-bottom: .65rem;
+        display: flex; gap: .8rem; align-items: flex-start;
+      }
+      .pipe-dot {
+        flex: none; width: .65rem; height: .65rem; border-radius: 50%;
+        background: var(--gold); border: 2px solid var(--gold-deep); margin-top: .45rem;
+      }
+      .pipe-name { font-weight: 700; font-size: 1.08rem; line-height: 1.25; margin: 0; }
+      .pipe-detail { color: var(--muted); font-weight: 500; font-size: .97rem; margin-top: .15rem; }
+
+      /* ---------- Footer ---------- */
+      footer { margin-top: 2rem; border-top: 2px solid var(--line); padding-top: 1rem; text-align: center; }
+      .footer-company { font-weight: 700; font-size: .98rem; margin: 0; }
+      .footer-note { color: var(--muted); font-size: .95rem; margin: .35rem auto 0; max-width: 32rem; }
+
+      /* ---------- Request Day Off ---------- */
+      .rdo-open-wrap { margin-top: 1.1rem; }
+      .rdo-open {
+        width: 100%; display: flex; align-items: center; justify-content: center; gap: .55rem;
+        background: linear-gradient(150deg, var(--navy-deep) 0%, var(--navy) 58%, #0a7fc4 100%);
+        color: #fff; border: 0; border-bottom: 4px solid var(--gold); border-radius: 10px;
+        font-family: "Barlow Semi Condensed", "Barlow", sans-serif;
+        font-size: 1.3rem; font-weight: 700; letter-spacing: .02em; padding: .8rem 1rem;
+        box-shadow: var(--shadow); min-height: 3.2rem;
+      }
+      .rdo-open:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+      .rdo-overlay {
+        position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center;
+        background: rgba(6, 24, 38, .55); padding: 1rem;
+      }
+      .rdo-overlay[hidden] { display: none; }
+      .rdo-panel {
+        background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px;
+        box-shadow: var(--shadow); width: 100%; max-width: 26rem;
+        max-height: calc(100vh - 2rem); overflow-y: auto; padding: 1.25rem 1.25rem 1.35rem;
+      }
+      .rdo-title { font-family: "Barlow Semi Condensed", "Barlow", sans-serif; font-size: 1.5rem; font-weight: 700; margin: 0 0 1rem; }
+      .rdo-field { display: block; margin-bottom: .9rem; }
+      .rdo-field > span { display: block; font-weight: 600; margin-bottom: .3rem; }
+      .rdo-field input, .rdo-field textarea {
+        width: 100%; font: inherit; color: var(--ink); background: var(--surface);
+        border: 1px solid var(--line); border-radius: 8px; padding: .6rem .7rem;
+      }
+      .rdo-field input:focus-visible, .rdo-field textarea:focus-visible { outline: 3px solid var(--bright); outline-offset: 0; border-color: var(--navy); }
+      .rdo-field textarea { resize: vertical; }
+      .rdo-error { color: #b3261e; font-weight: 600; margin: 0 0 .8rem; }
+      @media (prefers-color-scheme: dark) { .rdo-error { color: #f2a49e; } }
+      .rdo-actions { display: flex; gap: .6rem; margin-top: 1rem; }
+      .rdo-cancel {
+        flex: 1; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line);
+        border-radius: 8px; font-weight: 600; padding: .6rem 1rem;
+      }
+      .rdo-submit {
+        flex: 2; background: var(--navy); color: #fff; border: 0; border-radius: 8px;
+        font-weight: 700; padding: .6rem 1rem;
+      }
+      .rdo-submit:disabled { opacity: .6; cursor: default; }
+      .rdo-success { text-align: center; padding: .5rem 0 .25rem; }
+      .rdo-success p { font-size: 1.15rem; font-weight: 700; margin: 0 0 1.1rem; }
+      .rdo-close {
+        background: var(--navy); color: #fff; border: 0; border-radius: 8px;
+        font-weight: 700; padding: .6rem 2rem;
+      }
+
+      @media (max-width: 380px) {
+        h1 { font-size: 2rem; }
+        .brand { font-size: .7rem; }
+        .lang-toggle button { padding: .45rem .75rem; min-width: 2.8rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <div class="hero-top">
+          <div>
+            <p class="brand">Blue Kangaroo Packoutz Baltimore &amp; Metro D.C.</p>
+            <h1 data-en="Crew Board" data-es="Tablero del Equipo">Crew Board</h1>
+            <p class="subtitle" data-en="Week of November 23–29, 2026 · Updated November 21, 2026" data-es="Semana del 23 al 29 de noviembre de 2026 · Actualizado el 21 de noviembre de 2026">Week of November 23–29, 2026 · Updated November 21, 2026</p>
+          </div>
+          <div class="lang-toggle" role="group" aria-label="Language / Idioma">
+            <button type="button" id="btn-en" aria-pressed="true">EN</button>
+            <button type="button" id="btn-es" aria-pressed="false">ES</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <div class="rdo-open-wrap">
+        <button type="button" class="rdo-open" id="rdo-open">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="M12 14v4"/><path d="M10 16h4"/></svg>
+          <span data-en="Request Day Off" data-es="Solicitar Día Libre">Request Day Off</span>
+        </button>
+      </div>
+
+      <!-- ================= THIS WEEK ================= -->
+      <section aria-labelledby="this-week-h">
+        <div class="section-head"><h2 id="this-week-h" data-en="This Week" data-es="Esta Semana">This Week</h2></div>
+
+        <!-- Monday -->
+        <article class="day">
+          <div class="day-head">
+            <div class="day-name"><span data-en="Monday" data-es="Lunes">Monday</span><span class="date" data-en="November 23" data-es="23 de noviembre">November 23</span></div>
+            <span class="day-tag" data-en="Warehouse day" data-es="Día en el almacén">Warehouse day</span>
+          </div>
+
+          <div class="job">
+            <div class="job-top">
+              <div>
+                <p class="job-name">Raymani Rhodes</p>
+                <p class="job-work" data-en="Contents Processing (scan and store into vaults)" data-es="Procesamiento de contenido (escanear y guardar en bóvedas)">Contents Processing (scan and store into vaults)</p>
+              </div>
+              <span class="chip chip-confirmed" data-en="Confirmed" data-es="Confirmado">Confirmed</span>
+            </div>
+            <div class="job-meta">
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span data-en="Warehouse" data-es="Almacén">Warehouse</span></span>
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>8:00 AM–12:00 PM</span>
+            </div>
+            <p class="crew-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-en="Crew:" data-es="Equipo:">Crew:</span>&nbsp;<strong data-en="to be assigned" data-es="por asignar">to be assigned</strong></p>
+          </div>
+
+          <div class="job">
+            <div class="job-top">
+              <div>
+                <p class="job-name">Colonel Mark Withers</p>
+                <p class="job-work" data-en="Scanning and Storing" data-es="Escaneo y almacenamiento">Scanning and Storing</p>
+              </div>
+              <span class="chip chip-confirmed" data-en="Confirmed" data-es="Confirmado">Confirmed</span>
+            </div>
+            <div class="job-meta">
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span data-en="Warehouse" data-es="Almacén">Warehouse</span></span>
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>12:00 PM–4:00 PM</span>
+            </div>
+            <p class="crew-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-en="Crew:" data-es="Equipo:">Crew:</span>&nbsp;<strong data-en="to be assigned" data-es="por asignar">to be assigned</strong></p>
+          </div>
+
+          <div class="job">
+            <div class="job-top">
+              <div>
+                <p class="job-name">Pennrose</p>
+                <p class="job-work" data-en="Wrap Up Processing for Friday's delivery" data-es="Procesamiento final para la entrega del viernes">Wrap Up Processing for Friday's delivery</p>
+              </div>
+              <span class="chip chip-confirmed" data-en="Confirmed" data-es="Confirmado">Confirmed</span>
+            </div>
+            <div class="job-meta">
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span data-en="Warehouse" data-es="Almacén">Warehouse</span></span>
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span data-en="Monday" data-es="Lunes">Monday</span></span>
+            </div>
+            <p class="crew-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-en="Crew:" data-es="Equipo:">Crew:</span>&nbsp;<strong data-en="to be assigned" data-es="por asignar">to be assigned</strong></p>
+          </div>
+        </article>
+
+        <!-- Tuesday -->
+        <article class="day">
+          <div class="day-head">
+            <div class="day-name"><span data-en="Tuesday" data-es="Martes">Tuesday</span><span class="date" data-en="November 24" data-es="24 de noviembre">November 24</span></div>
+          </div>
+
+          <div class="job">
+            <div class="job-top">
+              <div>
+                <p class="job-name">Robert Hopkins</p>
+                <p class="job-work" data-en="Packback" data-es="Entrega de pertenencias (packback)">Packback</p>
+              </div>
+              <span class="chip chip-confirmed" data-en="Confirmed" data-es="Confirmado">Confirmed</span>
+            </div>
+            <div class="job-meta">
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Phoenix, MD</span>
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>8:00 AM–4:00 PM</span>
+            </div>
+            <p class="crew-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-en="Crew:" data-es="Equipo:">Crew:</span>&nbsp;<strong data-en="to be assigned" data-es="por asignar">to be assigned</strong></p>
+          </div>
+
+          <div class="job">
+            <div class="job-top">
+              <div>
+                <p class="job-name">Walter Stankiwicz</p>
+                <p class="job-work" data-en="Packout, Day 1" data-es="Empaque, Día 1">Packout, Day 1</p>
+              </div>
+              <span class="chip chip-confirmed" data-en="Confirmed" data-es="Confirmado">Confirmed</span>
+            </div>
+            <div class="job-meta">
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Perry Hall, MD</span>
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>8:00 AM–4:00 PM</span>
+            </div>
+            <p class="crew-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-en="Crew:" data-es="Equipo:">Crew:</span>&nbsp;<strong data-en="to be assigned" data-es="por asignar">to be assigned</strong></p>
+          </div>
+        </article>
+
+        <!-- Wednesday -->
+        <article class="day">
+          <div class="day-head">
+            <div class="day-name"><span data-en="Wednesday" data-es="Miércoles">Wednesday</span><span class="date" data-en="November 25" data-es="25 de noviembre">November 25</span></div>
+          </div>
+
+          <div class="job">
+            <div class="job-top">
+              <div>
+                <p class="job-name">Walter Stankiwicz</p>
+                <p class="job-work" data-en="Packout, Day 2" data-es="Empaque, Día 2">Packout, Day 2</p>
+              </div>
+              <span class="chip chip-confirmed" data-en="Confirmed" data-es="Confirmado">Confirmed</span>
+            </div>
+            <div class="job-meta">
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Perry Hall, MD</span>
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>8:00 AM–4:00 PM</span>
+            </div>
+            <p class="crew-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-en="Crew:" data-es="Equipo:">Crew:</span>&nbsp;<strong data-en="to be assigned" data-es="por asignar">to be assigned</strong></p>
+          </div>
+
+          <div class="job">
+            <div class="job-top">
+              <div>
+                <p class="job-name">David Goldblum</p>
+                <p class="job-work" data-en="Book Unpacking (3-person crew)" data-es="Desempaque de libros (equipo de 3 personas)">Book Unpacking (3-person crew)</p>
+              </div>
+              <span class="chip chip-confirmed" data-en="Confirmed" data-es="Confirmado">Confirmed</span>
+            </div>
+            <div class="job-meta">
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Pikesville, MD</span>
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>8:00 AM–4:00 PM</span>
+            </div>
+            <p class="crew-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-en="Crew:" data-es="Equipo:">Crew:</span>&nbsp;<strong data-en="to be assigned" data-es="por asignar">to be assigned</strong></p>
+          </div>
+
+          <div class="day-note">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <span data-en="Note: Carlos is off." data-es="Nota: Carlos está libre.">Note: Carlos is off.</span>
+          </div>
+        </article>
+
+        <!-- Thursday -->
+        <article class="day">
+          <div class="day-head">
+            <div class="day-name"><span data-en="Thursday" data-es="Jueves">Thursday</span><span class="date" data-en="November 26" data-es="26 de noviembre">November 26</span></div>
+            <span class="day-tag" data-en="Holiday" data-es="Día festivo">Holiday</span>
+          </div>
+          <div class="day-empty">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+            <span><span class="big" data-en="Thanksgiving" data-es="Día de Acción de Gracias">Thanksgiving</span> — <span data-en="No jobs scheduled." data-es="No hay trabajos programados.">No jobs scheduled.</span></span>
+          </div>
+        </article>
+
+        <!-- Friday -->
+        <article class="day">
+          <div class="day-head">
+            <div class="day-name"><span data-en="Friday" data-es="Viernes">Friday</span><span class="date" data-en="November 27" data-es="27 de noviembre">November 27</span></div>
+          </div>
+
+          <div class="job">
+            <div class="job-top">
+              <div>
+                <p class="job-name">Pennrose</p>
+                <p class="job-work" data-en="Packback Delivery (furniture return, Units 207C, 223A, 223E)" data-es="Entrega de devolución (regreso de muebles, Unidades 207C, 223A, 223E)">Packback Delivery (furniture return, Units 207C, 223A, 223E)</p>
+              </div>
+              <span class="chip chip-confirmed" data-en="Confirmed" data-es="Confirmado">Confirmed</span>
+            </div>
+            <div class="job-meta">
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Salisbury, MD</span>
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>7:00 AM–3:00 PM</span>
+            </div>
+            <p class="crew-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-en="Crew:" data-es="Equipo:">Crew:</span>&nbsp;<strong data-en="to be assigned" data-es="por asignar">to be assigned</strong></p>
+          </div>
+
+          <div class="job">
+            <div class="job-top">
+              <div>
+                <p class="job-name">Tier One Relocation</p>
+                <p class="job-work" data-en="Cleaning Start" data-es="Inicio de limpieza">Cleaning Start</p>
+              </div>
+              <span class="chip chip-tentative" data-en="Tentative" data-es="Tentativo">Tentative</span>
+            </div>
+            <div class="job-meta">
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Dover, DE</span>
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>7:00 AM–3:00 PM</span>
+            </div>
+            <p class="crew-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-en="Crew:" data-es="Equipo:">Crew:</span>&nbsp;<strong data-en="to be assigned" data-es="por asignar">to be assigned</strong></p>
+          </div>
+        </article>
+
+        <!-- Saturday -->
+        <article class="day">
+          <div class="day-head">
+            <div class="day-name"><span data-en="Saturday" data-es="Sábado">Saturday</span><span class="date" data-en="November 28" data-es="28 de noviembre">November 28</span></div>
+            <span class="chip chip-tbc" data-en="To be confirmed" data-es="Por confirmar">To be confirmed</span>
+          </div>
+          <div class="day-empty">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+            <span data-en="Possible work day — to be confirmed." data-es="Posible día de trabajo — por confirmar.">Possible work day — to be confirmed.</span>
+          </div>
+        </article>
+      </section>
+
+      <!-- ================= PIPELINE ================= -->
+      <section aria-labelledby="pipeline-h">
+        <div class="section-head"><h2 id="pipeline-h" data-en="Pipeline — Coming Up" data-es="En Camino — Próximos Trabajos">Pipeline — Coming Up</h2></div>
+        <ul class="pipe-list">
+          <li class="pipe-item">
+            <span class="pipe-dot" aria-hidden="true"></span>
+            <div>
+              <p class="pipe-name">Model Prayer Ministries</p>
+              <p class="pipe-detail">Bladensburg, MD · <span data-en="Monday, November 30" data-es="Lunes, 30 de noviembre">Monday, November 30</span> · 8:00 AM</p>
+            </div>
+          </li>
+          <li class="pipe-item">
+            <span class="pipe-dot" aria-hidden="true"></span>
+            <div>
+              <p class="pipe-name" data-en="Dover Cleaning (Tier One)" data-es="Limpieza en Dover (Tier One)">Dover Cleaning (Tier One)</p>
+              <p class="pipe-detail">Dover, DE · <span data-en="Week of November 30 — date to be set" data-es="Semana del 30 de noviembre — fecha por definir">Week of November 30 — date to be set</span></p>
+            </div>
+          </li>
+          <li class="pipe-item">
+            <span class="pipe-dot" aria-hidden="true"></span>
+            <div>
+              <p class="pipe-name">Hardesty</p>
+              <p class="pipe-detail"><span data-en="Packback" data-es="Entrega de pertenencias (packback)">Packback</span> · <span data-en="date to be set" data-es="fecha por definir">date to be set</span></p>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <footer>
+        <p class="footer-company">Blue Kangaroo Packoutz Baltimore &amp; Metro D.C. — Maxwell Enterprises Corp</p>
+        <p class="footer-note" data-en="This schedule may change. Please check with your supervisor if you have any questions." data-es="Este horario puede cambiar. Por favor, confirme con su supervisor si tiene alguna pregunta.">This schedule may change. Please check with your supervisor if you have any questions.</p>
+      </footer>
+    </div>
+
+    <div class="rdo-overlay" id="rdo-overlay" hidden>
+      <div class="rdo-panel" role="dialog" aria-modal="true" aria-labelledby="rdo-title">
+        <h2 class="rdo-title" id="rdo-title" data-en="Request Day Off" data-es="Solicitar Día Libre">Request Day Off</h2>
+        <form id="rdo-form">
+          <label class="rdo-field">
+            <span data-en="Your name" data-es="Tu nombre">Your name</span>
+            <input type="text" id="rdo-name" required autocomplete="name" />
+          </label>
+          <label class="rdo-field">
+            <span data-en="Date" data-es="Fecha">Date</span>
+            <input type="date" id="rdo-date" required />
+          </label>
+          <label class="rdo-field">
+            <span data-en="Note (optional) — only Juan sees this" data-es="Nota (opcional) — solo Juan lo ve">Note (optional) — only Juan sees this</span>
+            <textarea id="rdo-note" rows="3"></textarea>
+          </label>
+          <p class="rdo-error" id="rdo-error" hidden></p>
+          <div class="rdo-actions">
+            <button type="button" class="rdo-cancel" id="rdo-cancel" data-en="Cancel" data-es="Cancelar">Cancel</button>
+            <button type="submit" class="rdo-submit" id="rdo-submit">Send Request</button>
+          </div>
+        </form>
+        <div class="rdo-success" id="rdo-success" hidden>
+          <p id="rdo-success-msg">Request sent. Thank you!</p>
+          <button type="button" class="rdo-close" id="rdo-close">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var btnEn = document.getElementById('btn-en');
+        var btnEs = document.getElementById('btn-es');
+        var currentLang = 'en';
+
+        /* ----- Request Day Off ----- */
+        var BRIDGE_URL = 'https://script.google.com/macros/s/AKfycby-9XxjHAy-TXfurTN3Y_eQF6LSjYTrllH3qYz8q4QpSAw4Ks2Dzmz9vOj8oijI9zGw/exec';
+        var RDO = {
+          en: { send: 'Send Request', sending: 'Sending…', success: 'Request sent. Thank you!', error: 'Something went wrong — please try again.', close: 'Close' },
+          es: { send: 'Enviar Solicitud', sending: 'Enviando…', success: 'Solicitud enviada. ¡Gracias!', error: 'Algo salió mal — inténtalo de nuevo.', close: 'Cerrar' }
+        };
+        var overlay = document.getElementById('rdo-overlay');
+        var form = document.getElementById('rdo-form');
+        var successBox = document.getElementById('rdo-success');
+        var successMsg = document.getElementById('rdo-success-msg');
+        var errorEl = document.getElementById('rdo-error');
+        var submitBtn = document.getElementById('rdo-submit');
+        var closeBtn = document.getElementById('rdo-close');
+        var nameInput = document.getElementById('rdo-name');
+        var dateInput = document.getElementById('rdo-date');
+        var noteInput = document.getElementById('rdo-note');
+        var sending = false;
+
+        function rdoStrings() {
+          var s = RDO[currentLang];
+          if (!sending) submitBtn.textContent = s.send;
+          successMsg.textContent = s.success;
+          closeBtn.textContent = s.close;
+          if (!errorEl.hidden) errorEl.textContent = s.error;
+        }
+        function openRdo() {
+          form.hidden = false;
+          successBox.hidden = true;
+          errorEl.hidden = true;
+          overlay.hidden = false;
+          nameInput.focus();
+        }
+        function closeRdo() {
+          overlay.hidden = true;
+          if (!successBox.hidden) form.reset();
+        }
+        document.getElementById('rdo-open').addEventListener('click', openRdo);
+        document.getElementById('rdo-cancel').addEventListener('click', closeRdo);
+        closeBtn.addEventListener('click', closeRdo);
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) closeRdo(); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !overlay.hidden) closeRdo(); });
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          if (sending) return;
+          var name = nameInput.value.trim();
+          var date = dateInput.value;
+          var note = noteInput.value.trim();
+          if (!name || !date) { form.reportValidity(); return; }
+          sending = true;
+          submitBtn.disabled = true;
+          submitBtn.textContent = RDO[currentLang].sending;
+          errorEl.hidden = true;
+          fetch(BRIDGE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ name: name, date: date, note: note })
+          }).then(function (res) {
+            if (!res.ok) throw new Error('Request failed');
+            sending = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = RDO[currentLang].send;
+            form.hidden = true;
+            successBox.hidden = false;
+            closeBtn.focus();
+          }).catch(function () {
+            sending = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = RDO[currentLang].send;
+            errorEl.textContent = RDO[currentLang].error;
+            errorEl.hidden = false;
+          });
+        });
+
+        function setLang(lang) {
+          currentLang = lang;
+          document.documentElement.lang = lang;
+          document.querySelectorAll('[data-en]').forEach(function (el) {
+            var val = el.getAttribute('data-' + lang);
+            if (val !== null) el.textContent = val;
+          });
+          btnEn.setAttribute('aria-pressed', lang === 'en' ? 'true' : 'false');
+          btnEs.setAttribute('aria-pressed', lang === 'es' ? 'true' : 'false');
+          document.title = lang === 'es' ? 'Tablero del Equipo' : 'Crew Board';
+          rdoStrings();
+        }
+        btnEn.addEventListener('click', function () { setLang('en'); });
+        btnEs.addEventListener('click', function () { setLang('es'); });
+        rdoStrings();
+      })();
+    </script>
+  </body>
+</html>
