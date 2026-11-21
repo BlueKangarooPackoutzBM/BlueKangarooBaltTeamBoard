@@ -500,8 +500,8 @@
             <input type="date" id="rdo-date" required />
           </label>
           <label class="rdo-field">
-            <span data-en="Note (optional) — only Juan sees this" data-es="Nota (opcional) — solo Juan lo ve">Note (optional) — only Juan sees this</span>
-            <textarea id="rdo-note" rows="3"></textarea>
+            <span data-en="Notes - Required Field" data-es="Notas - Campo Obligatorio">Notes - Required Field</span>
+            <textarea id="rdo-note" rows="3" required></textarea>
           </label>
           <p class="rdo-error" id="rdo-error" hidden></p>
           <div class="rdo-actions">
@@ -569,7 +569,7 @@
           var name = nameInput.value.trim();
           var date = dateInput.value;
           var note = noteInput.value.trim();
-          if (!name || !date) { form.reportValidity(); return; }
+          if (!name || !date || !note) { form.reportValidity(); return; }
           sending = true;
           submitBtn.disabled = true;
           submitBtn.textContent = RDO[currentLang].sending;
