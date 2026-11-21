@@ -253,6 +253,18 @@
         font-weight: 700; padding: .6rem 1rem;
       }
       .rdo-submit:disabled { opacity: .6; cursor: default; }
+      .rdo-field[hidden] { display: none; }
+      .rdo-jury-notice {
+        margin-bottom: .9rem; padding: .85rem .9rem; border-radius: 8px;
+        background: var(--note-bg); color: var(--note-ink); border: 1px solid var(--gold);
+      }
+      .rdo-jury-notice[hidden] { display: none; }
+      .rdo-jury-title {
+        font-family: "Barlow Semi Condensed", "Barlow", sans-serif;
+        font-size: 1.2rem; font-weight: 700; margin: 0 0 .45rem; line-height: 1.15;
+      }
+      .rdo-jury-text { margin: 0 0 .55rem; font-size: .98rem; line-height: 1.45; }
+      .rdo-jury-text:last-child { margin-bottom: 0; }
       .rdo-text { margin: 0 0 .5rem; font-size: 1.02rem; }
       @media (max-width: 380px) {
         h1 { font-size: 2rem; }
@@ -560,10 +572,15 @@
               <button type="button" class="rdo-type" role="radio" aria-checked="false" data-type="Jury Duty" data-en="Jury Duty" data-es="Jurado">Jury Duty</button>
             </div>
           </div>
-          <label class="rdo-field">
+          <label class="rdo-field" id="rdo-note-field">
             <span data-en="Notes - Required Field" data-es="Notas - Campo Obligatorio">Notes - Required Field</span>
             <textarea id="rdo-note" rows="3" required></textarea>
           </label>
+          <div class="rdo-jury-notice" id="rdo-jury-notice" hidden>
+            <h3 class="rdo-jury-title" data-en="Notification" data-es="Aviso">Notification</h3>
+            <p class="rdo-jury-text" data-en="Jury duty is an absence excused by law. To record your absence, you must present your jury summons or the Certificate of Attendance issued by the court to your Manager or Human Resources within 30 business days of your jury duty date." data-es="El servicio de jurado es una ausencia excusada por ley. Para registrar su ausencia, debe presentar su citación del jurado o el Certificado de Asistencia emitido por la corte a su Gerente o a Recursos Humanos dentro de los 30 días hábiles siguientes a la fecha de su servicio de jurado.">Jury duty is an absence excused by law. To record your absence, you must present your jury summons or the Certificate of Attendance issued by the court to your Manager or Human Resources within 30 business days of your jury duty date.</p>
+            <p class="rdo-jury-text" data-en="Where to get it: Your summons is mailed to you by the court before your service date. The Certificate of Attendance is given to you by the court clerk at the courthouse on the day you serve — ask the clerk for it before you leave. You can also find your jury service information on the court's juror website using the participant number printed on your summons." data-es="Dónde obtenerla: Su citación le llega por correo de la corte antes de su fecha de servicio. El Certificado de Asistencia se lo entrega el secretario de la corte el día que se presenta — pídalo antes de retirarse. También puede consultar la información de su servicio en el sitio web para jurados de la corte con el número de participante impreso en su citación.">Where to get it: Your summons is mailed to you by the court before your service date. The Certificate of Attendance is given to you by the court clerk at the courthouse on the day you serve — ask the clerk for it before you leave. You can also find your jury service information on the court's juror website using the participant number printed on your summons.</p>
+          </div>
           <p class="rdo-error" id="rdo-error" hidden></p>
           <p class="rdo-request-for" id="rdo-request-for" aria-live="polite">Request for: —</p>
           <div class="rdo-actions">
@@ -621,6 +638,9 @@
         var nameInput = document.getElementById('rdo-name');
         var requestForEl = document.getElementById('rdo-request-for');
         var noteInput = document.getElementById('rdo-note');
+        var noteField = document.getElementById('rdo-note-field');
+        var juryNotice = document.getElementById('rdo-jury-notice');
+        var JURY_NOTE_FIXED = 'Jury duty - summons or Certificate of Attendance to be presented to Manager or HR within 30 business days of the jury duty date.';
         var typeGroup = document.getElementById('rdo-type-group');
         var typeBtns = typeGroup.querySelectorAll('.rdo-type');
         var selectedType = '';
@@ -754,12 +774,19 @@
           renderCalendar();
         }
 
+        function updateNoteVisibility() {
+          var isJury = selectedType === 'Jury Duty';
+          noteField.hidden = isJury;
+          juryNotice.hidden = !isJury;
+          noteInput.required = !isJury;
+        }
         typeBtns.forEach(function (btn) {
           btn.addEventListener('click', function () {
             selectedType = btn.getAttribute('data-type');
             typeBtns.forEach(function (b) { b.setAttribute('aria-checked', b === btn ? 'true' : 'false'); });
             typeGroup.classList.remove('invalid');
             updateCalMode();
+            updateNoteVisibility();
           });
         });
         function clearType() {
@@ -767,6 +794,7 @@
           typeBtns.forEach(function (b) { b.setAttribute('aria-checked', 'false'); });
           typeGroup.classList.remove('invalid');
           updateCalMode();
+          updateNoteVisibility();
         }
 
         var DISCLAIMER_CONTENT = {
@@ -821,7 +849,7 @@
           if (sending) return;
           var name = nameInput.value.trim();
           var note = noteInput.value.trim();
-          if (!name || !note) { form.reportValidity(); return; }
+          if (!name || (selectedType !== 'Jury Duty' && !note)) { form.reportValidity(); return; }
           if (!selectedType) {
             typeGroup.classList.add('invalid');
             typeBtns[0].focus();
@@ -861,7 +889,7 @@
           var date = calIsRange()
             ? isoDate(selStart) + ' to ' + isoDate(selEnd)
             : isoDate(selStart);
-          var note = noteInput.value.trim();
+          var note = selectedType === 'Jury Duty' ? JURY_NOTE_FIXED : noteInput.value.trim();
           setSending(true);
           fetch(BRIDGE_URL, {
             method: 'POST',
