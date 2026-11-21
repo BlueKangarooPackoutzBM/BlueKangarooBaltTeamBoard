@@ -204,6 +204,39 @@
       }
       .rdo-field input:focus-visible, .rdo-field textarea:focus-visible { outline: 3px solid var(--bright); outline-offset: 0; border-color: var(--navy); }
       .rdo-field textarea { resize: vertical; }
+      .rdo-type-group { display: flex; flex-wrap: wrap; gap: .45rem; }
+      .rdo-type {
+        border: 1.5px solid var(--line); background: var(--surface-2); color: var(--ink);
+        border-radius: 999px; padding: .45rem .9rem; font-weight: 600; min-height: 2.5rem;
+      }
+      .rdo-type[aria-checked="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+      .rdo-type:focus-visible { outline: 3px solid var(--bright); outline-offset: 1px; }
+      .rdo-type-group.invalid .rdo-type { border-color: #b3261e; }
+      @media (prefers-color-scheme: dark) { .rdo-type-group.invalid .rdo-type { border-color: #f2a49e; } }
+      .rdo-cal { border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); padding: .7rem; }
+      .rdo-cal.invalid { border-color: #b3261e; }
+      @media (prefers-color-scheme: dark) { .rdo-cal.invalid { border-color: #f2a49e; } }
+      .rdo-cal-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .55rem; }
+      .rdo-cal-title { font-weight: 700; font-size: 1.05rem; }
+      .rdo-cal-nav {
+        flex: none; width: 2.5rem; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink);
+        border-radius: 8px; font-size: 1.25rem; line-height: 1; padding: 0;
+      }
+      .rdo-cal-nav:disabled { opacity: .35; cursor: default; }
+      .rdo-cal-nav:focus-visible { outline: 3px solid var(--bright); outline-offset: 1px; }
+      .rdo-cal-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 2px; }
+      .rdo-cal-week span { text-align: center; font-size: .78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .02em; padding: .2rem 0; }
+      .rdo-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+      .rdo-cal-day {
+        border: 0; background: transparent; color: var(--ink); border-radius: 6px;
+        min-height: 2.5rem; padding: .35rem 0; font-weight: 500; text-align: center;
+      }
+      .rdo-cal-day:hover:not(:disabled) { background: rgba(0,182,238,.18); }
+      .rdo-cal-day:focus-visible { outline: 3px solid var(--bright); outline-offset: -2px; }
+      .rdo-cal-day:disabled { color: var(--muted); opacity: .4; cursor: default; }
+      .rdo-cal-day.in-range { background: rgba(0,182,238,.28); border-radius: 0; }
+      .rdo-cal-day.endpoint { background: var(--navy); color: #fff; font-weight: 700; border-radius: 6px; }
+      .rdo-cal-summary { margin: .6rem 0 0; font-weight: 600; min-height: 1.45em; }
       .rdo-error { color: #b3261e; font-weight: 600; margin: 0 0 .8rem; }
       @media (prefers-color-scheme: dark) { .rdo-error { color: #f2a49e; } }
       .rdo-actions { display: flex; gap: .6rem; margin-top: 1rem; }
@@ -489,10 +522,28 @@
             <span data-en="Your name" data-es="Tu nombre">Your name</span>
             <input type="text" id="rdo-name" required autocomplete="name" />
           </label>
-          <label class="rdo-field">
-            <span data-en="Date" data-es="Fecha">Date</span>
-            <input type="date" id="rdo-date" required />
-          </label>
+          <div class="rdo-field">
+            <span id="rdo-cal-label" data-en="Date" data-es="Fecha">Date</span>
+            <div class="rdo-cal" id="rdo-cal">
+              <div class="rdo-cal-head">
+                <button type="button" class="rdo-cal-nav" id="rdo-cal-prev" aria-label="Previous month / Mes anterior">&#8249;</button>
+                <span class="rdo-cal-title" id="rdo-cal-title"></span>
+                <button type="button" class="rdo-cal-nav" id="rdo-cal-next" aria-label="Next month / Mes siguiente">&#8250;</button>
+              </div>
+              <div class="rdo-cal-week" id="rdo-cal-week" aria-hidden="true"></div>
+              <div class="rdo-cal-grid" id="rdo-cal-grid"></div>
+              <p class="rdo-cal-summary" id="rdo-cal-summary"></p>
+            </div>
+          </div>
+          <div class="rdo-field">
+            <span data-en="Request Type" data-es="Tipo de Solicitud">Request Type</span>
+            <div class="rdo-type-group" id="rdo-type-group" role="radiogroup" aria-label="Request Type / Tipo de Solicitud">
+              <button type="button" class="rdo-type" role="radio" aria-checked="false" data-type="Personal" data-en="Personal" data-es="Personal">Personal</button>
+              <button type="button" class="rdo-type" role="radio" aria-checked="false" data-type="Medical" data-en="Medical" data-es="Médico">Medical</button>
+              <button type="button" class="rdo-type" role="radio" aria-checked="false" data-type="Vacation" data-en="Vacation" data-es="Vacaciones">Vacation</button>
+              <button type="button" class="rdo-type" role="radio" aria-checked="false" data-type="Jury Duty" data-en="Jury Duty" data-es="Jurado">Jury Duty</button>
+            </div>
+          </div>
           <label class="rdo-field">
             <span data-en="Notes - Required Field" data-es="Notas - Campo Obligatorio">Notes - Required Field</span>
             <textarea id="rdo-note" rows="3" required></textarea>
@@ -549,9 +600,146 @@
         var disclaimerCancelBtn = document.getElementById('rdo-disclaimer-cancel');
         var thankyouCloseBtn = document.getElementById('rdo-thankyou-close');
         var nameInput = document.getElementById('rdo-name');
-        var dateInput = document.getElementById('rdo-date');
         var noteInput = document.getElementById('rdo-note');
+        var typeGroup = document.getElementById('rdo-type-group');
+        var typeBtns = typeGroup.querySelectorAll('.rdo-type');
+        var selectedType = '';
         var sending = false;
+
+        /* ----- Request date calendar: single date, or a range for Vacation ----- */
+        var calEl = document.getElementById('rdo-cal');
+        var calLabel = document.getElementById('rdo-cal-label');
+        var calTitle = document.getElementById('rdo-cal-title');
+        var calWeek = document.getElementById('rdo-cal-week');
+        var calGrid = document.getElementById('rdo-cal-grid');
+        var calSummary = document.getElementById('rdo-cal-summary');
+        var calPrev = document.getElementById('rdo-cal-prev');
+        var calNext = document.getElementById('rdo-cal-next');
+        var CAL_STRINGS = {
+          en: { labelSingle: 'Date', labelRange: 'Vacation Dates', date: 'Date', from: 'From', to: 'To',
+                promptSingle: 'Tap the day you need off.', promptRange: 'Tap your first vacation day, then your last.' },
+          es: { labelSingle: 'Fecha', labelRange: 'Fechas de Vacaciones', date: 'Fecha', from: 'Desde', to: 'Hasta',
+                promptSingle: 'Toca el día que necesitas libre.', promptRange: 'Toca tu primer día de vacaciones y luego el último.' }
+        };
+        var now = new Date();
+        var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        var calYear = today.getFullYear();
+        var calMonth = today.getMonth();
+        var selStart = null;
+        var selEnd = null;
+
+        function calIsRange() { return selectedType === 'Vacation'; }
+
+        function isoDate(d) {
+          var m = String(d.getMonth() + 1); if (m.length < 2) m = '0' + m;
+          var day = String(d.getDate()); if (day.length < 2) day = '0' + day;
+          return d.getFullYear() + '-' + m + '-' + day;
+        }
+        function fmtDate(d) {
+          return d.toLocaleDateString(currentLang === 'es' ? 'es-ES' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        function renderCalendar() {
+          var locale = currentLang === 'es' ? 'es-ES' : 'en-US';
+          calTitle.textContent = new Date(calYear, calMonth, 1).toLocaleDateString(locale, { month: 'long', year: 'numeric' });
+          calWeek.innerHTML = '';
+          for (var w = 0; w < 7; w++) {
+            var ws = document.createElement('span');
+            ws.textContent = new Date(2024, 0, 7 + w).toLocaleDateString(locale, { weekday: 'narrow' });
+            calWeek.appendChild(ws);
+          }
+          calPrev.disabled = (calYear === today.getFullYear() && calMonth === today.getMonth());
+          calGrid.innerHTML = '';
+          var firstDow = new Date(calYear, calMonth, 1).getDay();
+          var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+          for (var i = 0; i < firstDow; i++) {
+            calGrid.appendChild(document.createElement('span'));
+          }
+          for (var d = 1; d <= daysInMonth; d++) {
+            (function (dayNum) {
+              var date = new Date(calYear, calMonth, dayNum);
+              var btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'rdo-cal-day';
+              btn.textContent = String(dayNum);
+              if (date < today) { btn.disabled = true; }
+              if (selStart && selEnd && date > selStart && date < selEnd) btn.classList.add('in-range');
+              if ((selStart && date.getTime() === selStart.getTime()) || (selEnd && date.getTime() === selEnd.getTime())) btn.classList.add('endpoint');
+              btn.addEventListener('click', function () { pickCalDay(date); });
+              calGrid.appendChild(btn);
+            })(d);
+          }
+          var s = CAL_STRINGS[currentLang];
+          if (calIsRange()) {
+            if (selStart && selEnd) {
+              calSummary.textContent = s.from + ': ' + fmtDate(selStart) + ' \u2014 ' + s.to + ': ' + fmtDate(selEnd);
+            } else if (selStart) {
+              calSummary.textContent = s.from + ': ' + fmtDate(selStart);
+            } else {
+              calSummary.textContent = s.promptRange;
+            }
+          } else if (selStart) {
+            calSummary.textContent = s.date + ': ' + fmtDate(selStart);
+          } else {
+            calSummary.textContent = s.promptSingle;
+          }
+        }
+        function pickCalDay(date) {
+          if (!calIsRange()) {
+            selStart = date;
+            selEnd = null;
+          } else if (!selStart || (selStart && selEnd)) {
+            selStart = date;
+            selEnd = null;
+          } else if (date < selStart) {
+            selStart = date;
+            selEnd = null;
+          } else {
+            selEnd = date;
+          }
+          calEl.classList.remove('invalid');
+          renderCalendar();
+        }
+        calPrev.addEventListener('click', function () {
+          calMonth--;
+          if (calMonth < 0) { calMonth = 11; calYear--; }
+          renderCalendar();
+        });
+        calNext.addEventListener('click', function () {
+          calMonth++;
+          if (calMonth > 11) { calMonth = 0; calYear++; }
+          renderCalendar();
+        });
+        function updateCalMode() {
+          var range = calIsRange();
+          if (!range) selEnd = null;
+          calLabel.setAttribute('data-en', CAL_STRINGS.en[range ? 'labelRange' : 'labelSingle']);
+          calLabel.setAttribute('data-es', CAL_STRINGS.es[range ? 'labelRange' : 'labelSingle']);
+          calLabel.textContent = CAL_STRINGS[currentLang][range ? 'labelRange' : 'labelSingle'];
+          renderCalendar();
+        }
+        function clearCalendar() {
+          selStart = null;
+          selEnd = null;
+          calYear = today.getFullYear();
+          calMonth = today.getMonth();
+          calEl.classList.remove('invalid');
+          renderCalendar();
+        }
+
+        typeBtns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            selectedType = btn.getAttribute('data-type');
+            typeBtns.forEach(function (b) { b.setAttribute('aria-checked', b === btn ? 'true' : 'false'); });
+            typeGroup.classList.remove('invalid');
+            updateCalMode();
+          });
+        });
+        function clearType() {
+          selectedType = '';
+          typeBtns.forEach(function (b) { b.setAttribute('aria-checked', 'false'); });
+          typeGroup.classList.remove('invalid');
+          updateCalMode();
+        }
 
         function rdoStrings() {
           var s = RDO[currentLang];
@@ -583,52 +771,75 @@
           e.preventDefault();
           if (sending) return;
           var name = nameInput.value.trim();
-          var date = dateInput.value;
           var note = noteInput.value.trim();
-          if (!name || !date || !note) { form.reportValidity(); return; }
+          if (!name || !note) { form.reportValidity(); return; }
+          if (!selectedType) {
+            typeGroup.classList.add('invalid');
+            typeBtns[0].focus();
+            return;
+          }
+          if (calIsRange()) {
+            if (!selStart || !selEnd) {
+              calEl.classList.add('invalid');
+              return;
+            }
+          } else if (!selStart) {
+            calEl.classList.add('invalid');
+            return;
+          }
           errorEl.hidden = true;
+          if (selectedType === 'Jury Duty') {
+            sendRequest();
+            return;
+          }
           disclaimer.hidden = false;
           agreeBtn.focus();
         });
         disclaimerCancelBtn.addEventListener('click', function () {
           if (!sending) disclaimer.hidden = true;
         });
-        agreeBtn.addEventListener('click', function () {
-          if (sending) return;
+        function setSending(on) {
+          sending = on;
+          agreeBtn.disabled = on;
+          disclaimerCancelBtn.disabled = on;
+          submitBtn.disabled = on;
+          agreeBtn.textContent = on ? RDO[currentLang].sending : RDO[currentLang].agree;
+          submitBtn.textContent = on ? RDO[currentLang].sending : RDO[currentLang].send;
+        }
+        function sendRequest() {
           var name = nameInput.value.trim();
-          var date = dateInput.value;
+          var date = calIsRange()
+            ? isoDate(selStart) + ' to ' + isoDate(selEnd)
+            : isoDate(selStart);
           var note = noteInput.value.trim();
-          sending = true;
-          agreeBtn.disabled = true;
-          disclaimerCancelBtn.disabled = true;
-          agreeBtn.textContent = RDO[currentLang].sending;
+          setSending(true);
           fetch(BRIDGE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ name: name, date: date, note: note })
+            body: JSON.stringify({ name: name, date: date, note: note, type: selectedType })
           }).then(function (res) {
             if (!res.ok) throw new Error('Request failed');
-            sending = false;
-            agreeBtn.disabled = false;
-            disclaimerCancelBtn.disabled = false;
-            agreeBtn.textContent = RDO[currentLang].agree;
+            setSending(false);
             disclaimer.hidden = true;
             thankyou.hidden = false;
             thankyouCloseBtn.focus();
           }).catch(function () {
-            sending = false;
-            agreeBtn.disabled = false;
-            disclaimerCancelBtn.disabled = false;
-            agreeBtn.textContent = RDO[currentLang].agree;
+            setSending(false);
             disclaimer.hidden = true;
             errorEl.textContent = RDO[currentLang].error;
             errorEl.hidden = false;
           });
+        }
+        agreeBtn.addEventListener('click', function () {
+          if (sending) return;
+          sendRequest();
         });
         function closeThankyou() {
           thankyou.hidden = true;
           overlay.hidden = true;
           form.reset();
+          clearType();
+          clearCalendar();
         }
         thankyouCloseBtn.addEventListener('click', closeThankyou);
 
@@ -643,10 +854,12 @@
           btnEs.setAttribute('aria-pressed', lang === 'es' ? 'true' : 'false');
           document.title = lang === 'es' ? 'Tablero del Equipo' : 'Team Board';
           rdoStrings();
+          renderCalendar();
         }
         btnEn.addEventListener('click', function () { setLang('en'); });
         btnEs.addEventListener('click', function () { setLang('es'); });
         rdoStrings();
+        renderCalendar();
       })();
     </script>
   </body>
