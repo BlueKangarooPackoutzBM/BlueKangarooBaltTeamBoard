@@ -280,7 +280,7 @@
           <div>
             <p class="brand">Blue Kangaroo Packoutz Baltimore &amp; Metro D.C.</p>
             <h1 data-en="Team Board" data-es="Tablero del Equipo">Team Board</h1>
-            <p class="subtitle" data-en="Week of November 23–29, 2026 · Updated November 23, 2026" data-es="Semana del 23 al 29 de noviembre de 2026 · Actualizado el 23 de noviembre de 2026">Week of November 23–29, 2026 · Updated November 23, 2026</p>
+            <p class="subtitle" id="week-subtitle" data-en="Week of November 23–29, 2026 · Updated November 23, 2026" data-es="Semana del 23 al 29 de noviembre de 2026 · Actualizado el 23 de noviembre de 2026">Week of November 23–29, 2026 · Updated November 23, 2026</p>
           </div>
           <div class="lang-toggle" role="group" aria-label="Language / Idioma">
             <button type="button" id="btn-en" aria-pressed="true">EN</button>
@@ -299,7 +299,7 @@
       </div>
 
       <!-- ================= THIS WEEK ================= -->
-      <section aria-labelledby="this-week-h">
+      <section id="week-section" aria-labelledby="this-week-h">
         <div class="section-head"><h2 id="this-week-h" data-en="This Week" data-es="Esta Semana">This Week</h2></div>
 
         <!-- Monday -->
@@ -487,7 +487,7 @@
       </section>
 
       <!-- ================= PIPELINE ================= -->
-      <section aria-labelledby="pipeline-h">
+      <section id="pipeline-section" aria-labelledby="pipeline-h">
         <div class="section-head"><h2 id="pipeline-h" data-en="Pipeline — Coming Up" data-es="En Camino — Próximos Trabajos">Pipeline — Coming Up</h2></div>
         <ul class="pipe-list">
           <li class="pipe-item">
@@ -931,6 +931,207 @@
         rdoStrings();
         updateRequestFor();
         renderCalendar();
+      })();
+    </script>
+
+    <script>
+      /* ----- Live schedule from the Planner Board Bridge -----
+         On load, fetch the current week. If the fetch succeeds and returns a
+         "days" array, the week, header line, and pipeline below are rendered
+         from it using the same markup/classes as the static content. If the
+         fetch fails, times out, or returns no "days" array, the static
+         content already in the page stays exactly as-is (fallback).
+         Rendered text carries data-en / data-es attributes, so the existing
+         EN/ES toggle re-renders the live content with no refetch. */
+      (function () {
+        var BOARD_URL = 'https://script.google.com/macros/s/AKfycbx-IOP85J55L0WjpXcXO4R_A7u0VtIVNysXqtRu5IiH4Ysa_xcVSe11w4rk6xCy3tMzNw/exec';
+
+        var PIN_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+        var CLOCK_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+        var CREW_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+        var INFO_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
+        var CAL_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>';
+        var Q_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>';
+
+        var STR = {
+          crew: { en: 'Crew:', es: 'Equipo:' },
+          holidayTag: { en: 'Holiday', es: 'Día festivo' },
+          tbc: { en: 'To be confirmed', es: 'Por confirmar' },
+          tbcBody: { en: 'Possible work day — to be confirmed.', es: 'Posible día de trabajo — por confirmar.' },
+          noJobs: { en: 'No jobs scheduled.', es: 'No hay trabajos programados.' }
+        };
+
+        function esc(s) {
+          return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+        }
+        /* Bilingual field pair with cross-language fallback. */
+        function pair(obj, key) {
+          var en = obj[key + 'En'] || obj[key + 'Es'] || '';
+          var es = obj[key + 'Es'] || obj[key + 'En'] || '';
+          return { en: en, es: es };
+        }
+        function pick(p, lang) { return lang === 'es' ? p.es : p.en; }
+        function attrs(p) { return ' data-en="' + esc(p.en) + '" data-es="' + esc(p.es) + '"'; }
+
+        function currentLang() {
+          var es = document.getElementById('btn-es');
+          return es && es.getAttribute('aria-pressed') === 'true' ? 'es' : 'en';
+        }
+
+        function chipClass(statusEn) {
+          var s = String(statusEn || '').toLowerCase();
+          if (s.indexOf('tentative') !== -1) return 'chip chip-tentative';
+          if (s.indexOf('to be confirmed') !== -1) return 'chip chip-tbc';
+          return 'chip chip-confirmed';
+        }
+
+        function jobCard(card, lang) {
+          var desc = pair(card, 'desc');
+          var html = '<div class="job"><div class="job-top"><div>' +
+            '<p class="job-name">' + esc(card.title) + '</p>' +
+            '<p class="job-work"' + attrs(desc) + '>' + esc(pick(desc, lang)) + '</p>' +
+            '</div>';
+          if (card.statusEn || card.statusEs) {
+            var status = pair(card, 'status');
+            html += '<span class="' + chipClass(card.statusEn) + '"' + attrs(status) + '>' + esc(pick(status, lang)) + '</span>';
+          }
+          html += '</div><div class="job-meta">';
+          if (card.placeEn || card.placeEs) {
+            var place = pair(card, 'place');
+            html += '<span>' + PIN_SVG + '<span' + attrs(place) + '>' + esc(pick(place, lang)) + '</span></span>';
+          }
+          if (card.time) {
+            html += '<span>' + CLOCK_SVG + esc(card.time) + '</span>';
+          }
+          html += '</div>';
+          if (card.crewEn || card.crewEs) {
+            var crew = pair(card, 'crew');
+            html += '<p class="crew-line">' + CREW_SVG +
+              '<span' + attrs(STR.crew) + '>' + esc(pick(STR.crew, lang)) + '</span>&nbsp;' +
+              '<strong' + attrs(crew) + '>' + esc(pick(crew, lang)) + '</strong></p>';
+          }
+          html += '</div>';
+          return html;
+        }
+
+        function dayBlock(day, lang) {
+          var weekday = pair(day, 'weekday');
+          var dateLabel = pair(day, 'dateLabel');
+          var cards = day.cards || [];
+          var isHoliday = !!(day.holidayEn || day.holidayEs);
+          var isTbc = !isHoliday && !cards.length && day.empty === 'tbc';
+
+          var html = '<article class="day"><div class="day-head"><div class="day-name">' +
+            '<span' + attrs(weekday) + '>' + esc(pick(weekday, lang)) + '</span>' +
+            '<span class="date"' + attrs(dateLabel) + '>' + esc(pick(dateLabel, lang)) + '</span></div>';
+          if (isHoliday) {
+            html += '<span class="day-tag"' + attrs(STR.holidayTag) + '>' + esc(pick(STR.holidayTag, lang)) + '</span>';
+          } else if (isTbc) {
+            html += '<span class="chip chip-tbc"' + attrs(STR.tbc) + '>' + esc(pick(STR.tbc, lang)) + '</span>';
+          }
+          html += '</div>';
+
+          if (isHoliday) {
+            var holiday = pair(day, 'holiday');
+            html += '<div class="day-empty">' + CAL_SVG + '<span>' +
+              '<span class="big"' + attrs(holiday) + '>' + esc(pick(holiday, lang)) + '</span> — ' +
+              '<span' + attrs(STR.noJobs) + '>' + esc(pick(STR.noJobs, lang)) + '</span>' +
+              '</span></div>';
+          } else if (cards.length) {
+            for (var i = 0; i < cards.length; i++) html += jobCard(cards[i], lang);
+          } else if (isTbc) {
+            html += '<div class="day-empty">' + Q_SVG +
+              '<span' + attrs(STR.tbcBody) + '>' + esc(pick(STR.tbcBody, lang)) + '</span></div>';
+          } else {
+            html += '<div class="day-empty">' + CAL_SVG +
+              '<span' + attrs(STR.noJobs) + '>' + esc(pick(STR.noJobs, lang)) + '</span></div>';
+          }
+
+          if (day.noteEn || day.noteEs) {
+            var note = pair(day, 'note');
+            html += '<div class="day-note">' + INFO_SVG +
+              '<span' + attrs(note) + '>' + esc(pick(note, lang)) + '</span></div>';
+          }
+          html += '</article>';
+          return html;
+        }
+
+        function renderBoard(data, lang) {
+          /* Header week line: weekLabel + " · " + updatedLabel */
+          var sub = document.getElementById('week-subtitle');
+          if (sub && (data.weekLabelEn || data.weekLabelEs)) {
+            var week = pair(data, 'weekLabel');
+            var updated = pair(data, 'updatedLabel');
+            var line = {
+              en: updated.en ? week.en + ' · ' + updated.en : week.en,
+              es: updated.es ? week.es + ' · ' + updated.es : week.es
+            };
+            sub.setAttribute('data-en', line.en);
+            sub.setAttribute('data-es', line.es);
+            sub.textContent = pick(line, lang);
+          }
+
+          /* This Week: one day block per entry in days */
+          var weekSection = document.getElementById('week-section');
+          if (weekSection) {
+            var html = '';
+            for (var i = 0; i < data.days.length; i++) html += dayBlock(data.days[i], lang);
+            var holder = document.createElement('div');
+            holder.innerHTML = html;
+            var old = weekSection.querySelectorAll('.day');
+            for (var j = 0; j < old.length; j++) old[j].parentNode.removeChild(old[j]);
+            while (holder.firstChild) weekSection.appendChild(holder.firstChild);
+          }
+
+          /* Pipeline: one row per entry */
+          if (Array.isArray(data.pipeline)) {
+            var list = document.querySelector('#pipeline-section .pipe-list');
+            if (list) {
+              var phtml = '';
+              for (var k = 0; k < data.pipeline.length; k++) {
+                var p = data.pipeline[k];
+                var title = pair(p, 'title');
+                var meta = pair(p, 'meta');
+                phtml += '<li class="pipe-item"><span class="pipe-dot" aria-hidden="true"></span><div>' +
+                  '<p class="pipe-name"' + attrs(title) + '>' + esc(pick(title, lang)) + '</p>' +
+                  '<p class="pipe-detail"' + attrs(meta) + '>' + esc(pick(meta, lang)) + '</p>' +
+                  '</div></li>';
+              }
+              list.innerHTML = phtml;
+            }
+          }
+        }
+
+        function loadBoard() {
+          if (!window.fetch) return;
+          var controller = ('AbortController' in window) ? new AbortController() : null;
+          var timer = null;
+          if (controller) {
+            timer = setTimeout(function () { controller.abort(); }, 10000);
+          }
+          fetch(BOARD_URL, controller ? { signal: controller.signal } : {})
+            .then(function (res) {
+              if (!res.ok) throw new Error('Board fetch failed');
+              return res.json();
+            })
+            .then(function (data) {
+              if (timer) clearTimeout(timer);
+              if (data && Array.isArray(data.days) && data.days.length) {
+                renderBoard(data, currentLang());
+              }
+              /* No usable payload: keep the static fallback untouched. */
+            })
+            .catch(function () {
+              if (timer) clearTimeout(timer);
+              /* Fetch failed or timed out: keep the static fallback untouched. */
+            });
+        }
+
+        loadBoard();
       })();
     </script>
   </body>
