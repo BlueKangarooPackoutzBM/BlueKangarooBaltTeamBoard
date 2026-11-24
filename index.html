@@ -125,8 +125,19 @@
       }
       @media (prefers-color-scheme: dark) { .day-tag { color: var(--bright); } }
 
-      .job { padding: .85rem 1rem .9rem; }
+      .job { padding: .85rem 1rem .9rem; border-left: 5px solid var(--job-accent, transparent); }
       .job + .job { border-top: 1px dashed var(--line); }
+      .job-badge {
+        display: inline-flex; align-items: center; gap: .35rem;
+        font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+        padding: .18rem .5rem; border-radius: 999px; margin-bottom: .35rem; line-height: 1.25;
+        border: 1.5px solid var(--job-accent, var(--line)); color: var(--ink);
+        background: color-mix(in srgb, var(--job-accent, transparent) 10%, transparent);
+      }
+      .job-badge::before {
+        content: ""; flex: none; width: .5rem; height: .5rem; border-radius: 50%;
+        background: var(--job-accent, transparent);
+      }
       .job-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .6rem; }
       .job-name { font-size: 1.13rem; font-weight: 700; line-height: 1.2; margin: 0; }
       .job-work { margin: .15rem 0 0; font-size: 1rem; font-weight: 500; }
@@ -164,7 +175,7 @@
       }
       .pipe-dot {
         flex: none; width: .65rem; height: .65rem; border-radius: 50%;
-        background: var(--gold); border: 2px solid var(--gold-deep); margin-top: .45rem;
+        background: var(--job-accent, var(--gold)); border: 2px solid var(--job-accent, var(--gold-deep)); margin-top: .45rem;
       }
       .pipe-name { font-weight: 700; font-size: 1.08rem; line-height: 1.25; margin: 0; }
       .pipe-detail { color: var(--muted); font-weight: 500; font-size: .97rem; margin-top: .15rem; }
@@ -309,9 +320,10 @@
             <span class="day-tag" data-en="Warehouse day" data-es="Día en el almacén">Warehouse day</span>
           </div>
 
-          <div class="job">
+          <div class="job" style="--job-accent:#2563eb">
             <div class="job-top">
               <div>
+                <span class="job-badge" data-en="Job 1" data-es="Trabajo 1">Job 1</span>
                 <p class="job-name">Raymani Rhodes</p>
                 <p class="job-work" data-en="Contents Processing (scan and store into vaults)" data-es="Procesamiento de contenido (escanear y guardar en bóvedas)">Contents Processing (scan and store into vaults)</p>
               </div>
@@ -324,9 +336,10 @@
             <p class="crew-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-en="Crew:" data-es="Equipo:">Crew:</span>&nbsp;<strong data-en="Jennifer Perez (Lead), Yasmin Resendez, Ben Williams, Carlos Levy, Jesica Garcia, Jhoana Guevara" data-es="Jennifer Perez (Líder), Yasmin Resendez, Ben Williams, Carlos Levy, Jesica Garcia, Jhoana Guevara">Jennifer Perez (Lead), Yasmin Resendez, Ben Williams, Carlos Levy, Jesica Garcia, Jhoana Guevara</strong></p>
           </div>
 
-          <div class="job">
+          <div class="job" style="--job-accent:#16a34a">
             <div class="job-top">
               <div>
+                <span class="job-badge" data-en="Job 2" data-es="Trabajo 2">Job 2</span>
                 <p class="job-name">Colonel Mark Withers</p>
                 <p class="job-work" data-en="Scanning and Storing" data-es="Escaneo y almacenamiento">Scanning and Storing</p>
               </div>
@@ -339,9 +352,10 @@
             <p class="crew-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-en="Crew:" data-es="Equipo:">Crew:</span>&nbsp;<strong data-en="Jennifer Perez (Lead), Yasmin Resendez, Ben Williams, Carlos Levy, Jesica Garcia, Jhoana Guevara" data-es="Jennifer Perez (Líder), Yasmin Resendez, Ben Williams, Carlos Levy, Jesica Garcia, Jhoana Guevara">Jennifer Perez (Lead), Yasmin Resendez, Ben Williams, Carlos Levy, Jesica Garcia, Jhoana Guevara</strong></p>
           </div>
 
-          <div class="job">
+          <div class="job" style="--job-accent:#ea580c">
             <div class="job-top">
               <div>
+                <span class="job-badge" data-en="Job 3" data-es="Trabajo 3">Job 3</span>
                 <p class="job-name">Pennrose</p>
                 <p class="job-work" data-en="Wrap Up Processing for Wednesday's delivery" data-es="Procesamiento final para la entrega del miércoles">Wrap Up Processing for Wednesday's delivery</p>
               </div>
@@ -361,9 +375,10 @@
             <div class="day-name"><span data-en="Tuesday" data-es="Martes">Tuesday</span><span class="date" data-en="November 24" data-es="24 de noviembre">November 24</span></div>
           </div>
 
-          <div class="job">
+          <div class="job" style="--job-accent:#9333ea">
             <div class="job-top">
               <div>
+                <span class="job-badge" data-en="Job 4" data-es="Trabajo 4">Job 4</span>
                 <p class="job-name">Robert Hopkins</p>
                 <p class="job-work" data-en="Packback" data-es="Entrega de pertenencias (packback)">Packback</p>
               </div>
@@ -376,9 +391,10 @@
             <p class="crew-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-en="Crew:" data-es="Equipo:">Crew:</span>&nbsp;<strong data-en="Jennifer Perez (Lead), Jhoana Guevara, Ever Romero, Cristian Garcia" data-es="Jennifer Perez (Líder), Jhoana Guevara, Ever Romero, Cristian Garcia">Jennifer Perez (Lead), Jhoana Guevara, Ever Romero, Cristian Garcia</strong></p>
           </div>
 
-          <div class="job">
+          <div class="job" style="--job-accent:#0d9488">
             <div class="job-top">
               <div>
+                <span class="job-badge" data-en="Job 5" data-es="Trabajo 5">Job 5</span>
                 <p class="job-name">Walter Stankiwicz</p>
                 <p class="job-work" data-en="Packout, Day 1" data-es="Empaque, Día 1">Packout, Day 1</p>
               </div>
@@ -398,9 +414,10 @@
             <div class="day-name"><span data-en="Wednesday" data-es="Miércoles">Wednesday</span><span class="date" data-en="November 25" data-es="25 de noviembre">November 25</span></div>
           </div>
 
-          <div class="job">
+          <div class="job" style="--job-accent:#0d9488">
             <div class="job-top">
               <div>
+                <span class="job-badge" data-en="Job 5" data-es="Trabajo 5">Job 5</span>
                 <p class="job-name">Walter Stankiwicz</p>
                 <p class="job-work" data-en="Packout, Day 2" data-es="Empaque, Día 2">Packout, Day 2</p>
               </div>
@@ -413,9 +430,10 @@
             <p class="crew-line"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-en="Crew:" data-es="Equipo:">Crew:</span>&nbsp;<strong data-en="Yasmin Resendez (Lead), Ben Williams, Daniel Segura, Jhoana Guevara, Jesica Garcia" data-es="Yasmin Resendez (Líder), Ben Williams, Daniel Segura, Jhoana Guevara, Jesica Garcia">Yasmin Resendez (Lead), Ben Williams, Daniel Segura, Jhoana Guevara, Jesica Garcia</strong></p>
           </div>
 
-          <div class="job">
+          <div class="job" style="--job-accent:#ea580c">
             <div class="job-top">
               <div>
+                <span class="job-badge" data-en="Job 3" data-es="Trabajo 3">Job 3</span>
                 <p class="job-name">Pennrose</p>
                 <p class="job-work" data-en="Packback Delivery (furniture return, Units 207C, 223A, 223E)" data-es="Entrega de devolución (regreso de muebles, Unidades 207C, 223A, 223E)">Packback Delivery (furniture return, Units 207C, 223A, 223E)</p>
               </div>
@@ -452,9 +470,10 @@
             <div class="day-name"><span data-en="Friday" data-es="Viernes">Friday</span><span class="date" data-en="November 27" data-es="27 de noviembre">November 27</span></div>
           </div>
 
-          <div class="job">
+          <div class="job" style="--job-accent:#db2777">
             <div class="job-top">
               <div>
+                <span class="job-badge" data-en="Job 6" data-es="Trabajo 6">Job 6</span>
                 <p class="job-name">Paul Odermatt</p>
                 <p class="job-work" data-en="Contents Processing" data-es="Procesamiento de contenido">Contents Processing</p>
               </div>
@@ -490,21 +509,21 @@
       <section id="pipeline-section" aria-labelledby="pipeline-h">
         <div class="section-head"><h2 id="pipeline-h" data-en="Pipeline — Coming Up" data-es="En Camino — Próximos Trabajos">Pipeline — Coming Up</h2></div>
         <ul class="pipe-list">
-          <li class="pipe-item">
+          <li class="pipe-item" style="--job-accent:#ca8a04">
             <span class="pipe-dot" aria-hidden="true"></span>
             <div>
               <p class="pipe-name">Model Prayer Ministries</p>
               <p class="pipe-detail">Bladensburg, MD · <span data-en="Monday, November 30" data-es="Lunes, 30 de noviembre">Monday, November 30</span> · 8:00 AM</p>
             </div>
           </li>
-          <li class="pipe-item">
+          <li class="pipe-item" style="--job-accent:#4f46e5">
             <span class="pipe-dot" aria-hidden="true"></span>
             <div>
               <p class="pipe-name" data-en="Dover Cleaning (Tier One)" data-es="Limpieza en Dover (Tier One)">Dover Cleaning (Tier One)</p>
               <p class="pipe-detail">Dover, DE · <span data-en="Week of November 30 — date to be set" data-es="Semana del 30 de noviembre — fecha por definir">Week of November 30 — date to be set</span></p>
             </div>
           </li>
-          <li class="pipe-item">
+          <li class="pipe-item" style="--job-accent:#2563eb">
             <span class="pipe-dot" aria-hidden="true"></span>
             <div>
               <p class="pipe-name">Hardesty</p>
@@ -982,6 +1001,40 @@
           return es && es.getAttribute('aria-pressed') === 'true' ? 'es' : 'en';
         }
 
+        /* ----- Per-job accent markers -----
+           Each distinct job (by title) gets one accent + badge number for the
+           whole week, assigned in first-appearance order across the days.
+           If the payload card carries a valid "accent" hex, it wins (so the
+           board matches the Planner); otherwise the shared palette cycles. */
+        var PALETTE = ['#2563eb', '#16a34a', '#ea580c', '#9333ea', '#0d9488', '#db2777', '#ca8a04', '#4f46e5'];
+        function validAccent(a) {
+          return /^#[0-9a-fA-F]{6}$/.test(String(a || '')) ? String(a) : null;
+        }
+        function makeMarkerRegistry() {
+          var registry = {};
+          var count = 0;
+          return {
+            markerFor: function (title, accentField) {
+              var key = String(title || '').trim().toLowerCase();
+              if (!key) return null;
+              var payloadAccent = validAccent(accentField);
+              if (!registry[key]) {
+                registry[key] = {
+                  accent: payloadAccent || PALETTE[count % PALETTE.length],
+                  num: count + 1,
+                  fromPayload: !!payloadAccent
+                };
+                count++;
+              } else if (!registry[key].fromPayload && payloadAccent) {
+                registry[key].accent = payloadAccent;
+                registry[key].fromPayload = true;
+              }
+              return registry[key];
+            }
+          };
+        }
+        function badgePair(num) { return { en: 'Job ' + num, es: 'Trabajo ' + num }; }
+
         function chipClass(statusEn) {
           var s = String(statusEn || '').toLowerCase();
           if (s.indexOf('tentative') !== -1) return 'chip chip-tentative';
@@ -989,9 +1042,12 @@
           return 'chip chip-confirmed';
         }
 
-        function jobCard(card, lang) {
+        function jobCard(card, lang, marker) {
           var desc = pair(card, 'desc');
-          var html = '<div class="job"><div class="job-top"><div>' +
+          var style = marker ? ' style="--job-accent:' + esc(marker.accent) + '"' : '';
+          var badge = marker ? badgePair(marker.num) : null;
+          var html = '<div class="job"' + style + '><div class="job-top"><div>' +
+            (badge ? '<span class="job-badge"' + attrs(badge) + '>' + esc(pick(badge, lang)) + '</span>' : '') +
             '<p class="job-name">' + esc(card.title) + '</p>' +
             '<p class="job-work"' + attrs(desc) + '>' + esc(pick(desc, lang)) + '</p>' +
             '</div>';
@@ -1018,7 +1074,7 @@
           return html;
         }
 
-        function dayBlock(day, lang) {
+        function dayBlock(day, lang, markers) {
           var weekday = pair(day, 'weekday');
           var dateLabel = pair(day, 'dateLabel');
           var cards = day.cards || [];
@@ -1042,7 +1098,7 @@
               '<span' + attrs(STR.noJobs) + '>' + esc(pick(STR.noJobs, lang)) + '</span>' +
               '</span></div>';
           } else if (cards.length) {
-            for (var i = 0; i < cards.length; i++) html += jobCard(cards[i], lang);
+            for (var i = 0; i < cards.length; i++) html += jobCard(cards[i], lang, markers ? markers[i] : null);
           } else if (isTbc) {
             html += '<div class="day-empty">' + Q_SVG +
               '<span' + attrs(STR.tbcBody) + '>' + esc(pick(STR.tbcBody, lang)) + '</span></div>';
@@ -1075,11 +1131,22 @@
             sub.textContent = pick(line, lang);
           }
 
+          /* Accent markers: assign in first-appearance order across the week
+             (days arrive earliest-first), same job = same marker every day. */
+          var markers = makeMarkerRegistry();
+          var dayMarkers = [];
+          for (var d = 0; d < data.days.length; d++) {
+            var dayCards = data.days[d].cards || [];
+            var dm = [];
+            for (var c = 0; c < dayCards.length; c++) dm.push(markers.markerFor(dayCards[c].title, dayCards[c].accent));
+            dayMarkers.push(dm);
+          }
+
           /* This Week: one day block per entry in days */
           var weekSection = document.getElementById('week-section');
           if (weekSection) {
             var html = '';
-            for (var i = 0; i < data.days.length; i++) html += dayBlock(data.days[i], lang);
+            for (var i = 0; i < data.days.length; i++) html += dayBlock(data.days[i], lang, dayMarkers[i]);
             var holder = document.createElement('div');
             holder.innerHTML = html;
             var old = weekSection.querySelectorAll('.day');
@@ -1096,7 +1163,9 @@
                 var p = data.pipeline[k];
                 var title = pair(p, 'title');
                 var meta = pair(p, 'meta');
-                phtml += '<li class="pipe-item"><span class="pipe-dot" aria-hidden="true"></span><div>' +
+                var pMarker = markers.markerFor(title.en, p.accent);
+                var pStyle = pMarker ? ' style="--job-accent:' + esc(pMarker.accent) + '"' : '';
+                phtml += '<li class="pipe-item"' + pStyle + '><span class="pipe-dot" aria-hidden="true"></span><div>' +
                   '<p class="pipe-name"' + attrs(title) + '>' + esc(pick(title, lang)) + '</p>' +
                   '<p class="pipe-detail"' + attrs(meta) + '>' + esc(pick(meta, lang)) + '</p>' +
                   '</div></li>';
